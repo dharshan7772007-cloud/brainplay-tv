@@ -1,0 +1,559 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  font-family: 'Outfit', sans-serif;
+  color: #f5f3ff;
+  background: #080916;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  --muted: #a5a6c4;
+  --panel: #111328;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 80% 5%, #222054 0%, transparent 35%),
+    radial-gradient(ellipse at 0% 70%, #151a3a 0%, transparent 40%),
+    #080916;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  background-color: transparent;
+}
+
+.app {
+  width: min(1440px, 100%);
+  margin: 0 auto;
+  padding: 0 5%;
+  overflow: hidden;
+}
+
+.topbar {
+  height: 82px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  border-bottom: 1px solid #ffffff13;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  font-size: 18px;
+}
+
+.brand-icon {
+  color: #a998ff;
+  font-size: 29px;
+}
+
+.brand-light {
+  color: #a998ff;
+}
+
+.top-label,
+.profile {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.3px;
+}
+
+.profile {
+  padding: 10px 14px;
+  border: 1px solid #ffffff20;
+  border-radius: 30px;
+}
+
+.profile span {
+  margin-right: 7px;
+}
+
+.hero {
+  min-height: 355px;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  align-items: center;
+  position: relative;
+  border-bottom: 1px solid #ffffff12;
+}
+
+.hero-copy {
+  padding: 35px 0;
+  position: relative;
+  z-index: 1;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #b4a8ff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.eyebrow > span {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #8f77ff;
+  box-shadow: 0 0 12px #8f77ff;
+}
+
+.hero h1 {
+  margin: 22px 0 15px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(26px, 3.2vw, 46px);
+  line-height: 1.25;
+  letter-spacing: -1px;
+  font-weight: 800;
+  color: #F5F3FF;
+}
+
+.hero h1 span {
+  color: #A998FF;
+}
+
+.hero h1 span {
+  color: #a998ff;
+}
+
+.hero-copy > p {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+  max-width: 430px;
+}
+
+.primary-button {
+  margin-top: 17px;
+  padding: 14px 21px;
+  border: 0;
+  border-radius: 8px;
+  background: linear-gradient(110deg, #8c6bff, #6047dc);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  box-shadow: 0 8px 28px #7155ff30;
+}
+
+.primary-button:focus-visible,
+.world-card:focus-visible {
+  outline: 3px solid white;
+  outline-offset: 4px;
+}
+
+.planet-scene {
+  height: 300px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.planet {
+  position: absolute;
+  border-radius: 50%;
+}
+
+.planet-large {
+  width: 190px;
+  height: 190px;
+  background:
+    radial-gradient(circle at 30% 28%, #f4b5ff 0%, #a36dff 25%, #5b43b8 58%, #241d62 100%);
+  box-shadow: inset -20px -18px 35px #09092390, 0 0 65px #7958ff48;
+}
+
+.planet-small {
+  width: 57px;
+  height: 57px;
+  right: 13%;
+  top: 18%;
+  background: linear-gradient(140deg, #8fe7ff, #3679d5 70%);
+  box-shadow: 0 0 28px #40aaff35;
+}
+
+.orbit {
+  position: absolute;
+  width: 270px;
+  height: 95px;
+  border: 1px solid #b9aaff65;
+  border-radius: 50%;
+  transform: rotate(-25deg);
+}
+
+.orbit-two {
+  width: 315px;
+  height: 125px;
+  transform: rotate(28deg);
+  border-color: #6a66e65c;
+}
+
+.astronaut {
+  position: absolute;
+  z-index: 2;
+  font-size: 66px;
+  right: 18%;
+  bottom: 16%;
+  filter: drop-shadow(0 7px 12px #0008);
+  transform: rotate(-12deg);
+}
+
+.star {
+  position: absolute;
+  color: #e0d7ff;
+}
+
+.star-one {
+  top: 15%;
+  left: 15%;
+  font-size: 25px;
+}
+
+.star-two {
+  right: 10%;
+  bottom: 20%;
+  font-size: 32px;
+}
+
+.star-three {
+  left: 20%;
+  bottom: 18%;
+  font-size: 16px;
+}
+
+.world-section {
+  padding: 32px 0 38px;
+}
+
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+
+.section-heading h2 {
+  margin: 8px 0 0;
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(20px, 2.4vw, 29px);
+  color: #F5F3FF;
+}
+
+.progress {
+  color: #d7cfff;
+  border: 1px solid #a998ff40;
+  background: #a998ff0c;
+  border-radius: 30px;
+  padding: 10px 14px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+}
+
+.world-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 15px;
+}
+
+.world-card {
+  min-width: 0;
+  min-height: 265px;
+  text-align: left;
+  border: 1px solid #ffffff16;
+  border-radius: 13px;
+  background: linear-gradient(150deg, #171a34, #101224 80%);
+  padding: 16px;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.world-card:hover,
+.world-card.selected {
+  border-color: var(--world-color);
+  transform: translateY(-3px);
+  background: linear-gradient(150deg, color-mix(in srgb, var(--world-color) 15%, #171a34), #101224 85%);
+}
+
+.card-top,
+.card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+}
+
+.card-top {
+  color: #c1c1dc;
+}
+
+.card-status {
+  color: var(--world-color);
+  font-size: 8px;
+  text-align: right;
+}
+
+.world-art {
+  height: 82px;
+  display: flex;
+  align-items: center;
+  font-size: 49px;
+  filter: drop-shadow(0 5px 14px color-mix(in srgb, var(--world-color) 40%, transparent));
+}
+
+.world-card h3 {
+  margin: 4px 0 6px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.world-subtitle {
+  margin: 0;
+  color: #e1dcff;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.world-description {
+  min-height: 38px;
+  margin: 9px 0 15px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.card-bottom {
+  padding-top: 12px;
+  border-top: 1px solid #ffffff14;
+  color: var(--world-color);
+}
+
+.footer {
+  min-height: 58px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  border-top: 1px solid #ffffff13;
+  color: #8889a9;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.footer span:first-child {
+  color: #b5a7ff;
+}
+
+@media (max-width: 900px) {
+  .world-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hero {
+    grid-template-columns: 1fr 0.7fr;
+  }
+
+  .planet-large {
+    width: 145px;
+    height: 145px;
+  }
+
+  .orbit {
+    width: 220px;
+  }
+
+  .orbit-two {
+    width: 250px;
+  }
+
+  .astronaut {
+    font-size: 50px;
+  }
+}
+
+@media (max-width: 600px) {
+  .app {
+    padding: 0 18px;
+  }
+
+  .topbar {
+    height: 68px;
+  }
+
+  .brand {
+    font-size: 14px;
+  }
+
+  .top-label {
+    display: none;
+  }
+
+  .profile {
+    font-size: 9px;
+    padding: 8px 10px;
+  }
+
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-copy {
+    padding-bottom: 0;
+  }
+
+  .planet-scene {
+    height: 230px;
+    margin-top: -10px;
+  }
+
+  .section-heading {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .world-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .world-card {
+    min-height: 235px;
+  }
+
+  .footer {
+    align-items: start;
+    justify-content: center;
+    flex-direction: column;
+    padding: 18px 0;
+  }
+}
+/* BrainPlay TV mission screen fixes */
+.mission-title,
+.mission-controls h2,
+.quiz h2 {
+  color: #f5f3ff !important;
+}
+
+.back-button,
+.choice,
+.quiz-option {
+  color: #f5f3ff !important;
+  background: #171a32 !important;
+  border: 1px solid #ffffff25;
+  border-radius: 10px;
+}
+
+.back-button {
+  display: inline-block;
+  padding: 12px 16px;
+}
+
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin: 12px 0;
+  padding: 14px;
+  text-align: left;
+}
+
+.choice-active,
+.quiz-selected {
+  border: 2px solid #a998ff !important;
+  background: #8c6bff25 !important;
+}
+
+.choice strong {
+  color: #ffffff;
+}
+
+.choice small {
+  color: #b7b8d4;
+}
+
+.quiz-option {
+  display: block;
+  width: 100%;
+  margin: 10px 0;
+  padding: 14px;
+  text-align: left;
+  white-space: normal;
+}
+
+.quiz-option:hover,
+.choice:hover,
+.back-button:hover {
+  border-color: #a998ff;
+}
+
+.mission-controls {
+  min-width: 0;
+}
+
+.mission-layout {
+  align-items: start;
+}
+
+.quiz {
+  max-width: 900px;
+}
+
+.quiz .primary-button {
+  margin-top: 12px;
+}
+
+@media (max-width: 750px) {
+  .mission-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.result-screen h1 {
+  color: #F5F3FF !important;
+}
+
+.brand-button:focus-visible {
+  outline: 2px solid #A998FF;
+  outline-offset: 4px;
+}
+
+.brand-button:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.result-screen {
+  min-height: 520px;
+  padding: 55px 20px;
+}
+
+.result-screen .eyebrow {
+  justify-content: center;
+}
