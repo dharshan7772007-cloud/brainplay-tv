@@ -1,519 +1,242 @@
-
 import { useEffect, useState } from 'react'
 import './App.css'
 
-const worlds = [
+type WorldId = 'cosmic' | 'wild' | 'ocean' | 'inventor'
+type Screen = 'home' | 'mission' | 'result'
+type Question = { prompt: string; answers: string[]; correct: number; fact: string }
+type World = {
+  id: WorldId; number: string; name: string; subtitle: string; category: string
+  emoji: string; accent: string; planet: string; atmosphere: string; description: string
+  questions: Question[]
+}
+
+const worlds: World[] = [
   {
-    emoji: '🚀',
-    name: 'COSMIC FRONTIER',
-    subtitle: 'Explore the Solar System',
-    description: 'Help a Mars rover cross rocky terrain.',
-    color: '#8c6bff',
-    status: 'AVAILABLE',
+    id: 'cosmic', number: '01', name: 'COSMIC FRONTIER', subtitle: 'Beyond the red horizon',
+    category: 'SPACE EXPLORATION', emoji: '🚀', accent: '#ff8a5b', planet: 'mars',
+    atmosphere: 'A new world is waiting.', description: 'Engineer a rover that can survive the rocky surface of Mars.',
+    questions: [
+      { prompt: 'Which wheel design helps a rover travel over loose sand?', answers: ['Narrow, smooth wheels', 'Wide wheels with good grip', 'Tiny glass wheels'], correct: 1, fact: 'Wider wheels spread the load and can improve flotation and traction on loose ground.' },
+      { prompt: 'Why do Mars rovers use solar panels or batteries?', answers: ['To power their instruments', 'To change the planet’s orbit', 'To make oxygen instantly'], correct: 0, fact: 'Rovers need electrical power for computers, cameras, heaters and scientific instruments.' },
+      { prompt: 'What should a rover do before driving over an unknown rock field?', answers: ['Drive at full speed', 'Inspect the route and plan carefully', 'Turn off its cameras'], correct: 1, fact: 'Rovers use images and careful route planning to reduce risk in unfamiliar terrain.' },
+    ],
   },
   {
-    emoji: '🌿',
-    name: 'WILD EARTH',
-    subtitle: 'Discover Nature',
-    description: 'Protect wildlife and explore ecosystems.',
-    color: '#23a879',
-    status: 'COMING SOON',
+    id: 'wild', number: '02', name: 'WILD EARTH', subtitle: 'The living planet',
+    category: 'NATURE & ECOSYSTEMS', emoji: '🌿', accent: '#69e6a6', planet: 'earth',
+    atmosphere: 'Every species has a role.', description: 'Restore a fragile habitat by making smart ecosystem choices.',
+    questions: [
+      { prompt: 'What is a food chain mainly showing?', answers: ['How energy moves between organisms', 'How rocks form', 'How clouds are named'], correct: 0, fact: 'Food chains show how energy passes from producers to consumers.' },
+      { prompt: 'Which action best protects a local habitat?', answers: ['Dumping waste in a stream', 'Planting native species', 'Removing every insect'], correct: 1, fact: 'Native plants support local wildlife and are adapted to local conditions.' },
+      { prompt: 'Why are bees important to many ecosystems?', answers: ['They pollinate many plants', 'They create sunlight', 'They stop all rainfall'], correct: 0, fact: 'Pollinators help many flowering plants reproduce, supporting food webs and biodiversity.' },
+    ],
   },
   {
-    emoji: '🌊',
-    name: 'OCEAN SECRETS',
-    subtitle: 'Dive Into Discovery',
-    description: 'Explore the underwater world.',
-    color: '#249bd8',
-    status: 'COMING SOON',
+    id: 'ocean', number: '03', name: 'OCEAN SECRETS', subtitle: 'Into the blue unknown',
+    category: 'OCEAN SCIENCE', emoji: '🌊', accent: '#68caff', planet: 'ocean',
+    atmosphere: 'Dive deeper. Discover more.', description: 'Guide a research submersible and help keep the ocean healthy.',
+    questions: [
+      { prompt: 'Why is the deep ocean very dark?', answers: ['Sunlight does not reach most deep areas', 'The water absorbs every sound', 'There are no stars'], correct: 0, fact: 'Sunlight fades with depth; below the sunlit zone, photosynthesis is generally not possible.' },
+      { prompt: 'Which choice reduces plastic pollution?', answers: ['Use single-use plastic more often', 'Reuse items and dispose of waste properly', 'Leave rubbish on beaches'], correct: 1, fact: 'Reducing, reusing and correctly disposing of plastics helps keep waste out of waterways.' },
+      { prompt: 'What is coral?', answers: ['A living animal colony', 'A type of metal', 'A floating rock'], correct: 0, fact: 'Corals are animals that often build reefs, creating habitat for many marine species.' },
+    ],
   },
   {
-    emoji: '⚙️',
-    name: "INVENTOR'S LAB",
-    subtitle: 'Build Something Amazing',
-    description: 'Solve problems with science and engineering.',
-    color: '#ee9840',
-    status: 'COMING SOON',
+    id: 'inventor', number: '04', name: "INVENTOR'S LAB", subtitle: 'Ideas become reality',
+    category: 'SCIENCE & ENGINEERING', emoji: '⚙️', accent: '#ffd166', planet: 'lab',
+    atmosphere: 'Think. Test. Improve.', description: 'Solve engineering puzzles using evidence, design and iteration.',
+    questions: [
+      { prompt: 'What is the best first step when solving a design problem?', answers: ['Understand the problem and constraints', 'Build anything without a plan', 'Ignore the user'], correct: 0, fact: 'Good engineering starts by understanding the need, constraints and success criteria.' },
+      { prompt: 'What does a fair test try to do?', answers: ['Change every variable at once', 'Change one factor while controlling others', 'Hide the results'], correct: 1, fact: 'Controlling variables helps us identify what caused a result.' },
+      { prompt: 'What should you do when a prototype fails?', answers: ['Learn from the result and improve it', 'Never test again', 'Pretend it worked'], correct: 0, fact: 'Iteration turns test results into better designs.' },
+    ],
   },
 ]
 
-function readSavedValue(key: string) {
+type SavedProgress = { xp: number; completed: WorldId[]; best: Record<string, number> }
+const STORAGE_KEY = 'brainplay-cinematic-progress-v1'
+const initialProgress: SavedProgress = { xp: 0, completed: [], best: {} }
+
+function readProgress(): SavedProgress {
   try {
-    return localStorage.getItem(key)
-  } catch {
-    return null
-  }
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return initialProgress
+    const parsed = JSON.parse(raw) as SavedProgress
+    return { xp: Number(parsed.xp) || 0, completed: Array.isArray(parsed.completed) ? parsed.completed : [], best: parsed.best || {} }
+  } catch { return initialProgress }
 }
 
 function App() {
-  const [screen, setScreen] = useState<'home' | 'mission' | 'result'>('home')
-  const [wheel, setWheel] = useState<'standard' | 'wide'>('standard')
-  const [tested, setTested] = useState(false)
-  const [answer, setAnswer] = useState('')
-  const [badge, setBadge] = useState(
-    () => readSavedValue('brainplay-mars-badge') === 'earned'
-  )
-  const [score, setScore] = useState(0)
-  const [bestScore, setBestScore] = useState(
-    () => Number(readSavedValue('brainplay-best-score')) || 0
-  )
+  const [screen, setScreen] = useState<Screen>('home')
+  const [activeWorldId, setActiveWorldId] = useState<WorldId>('cosmic')
+  const [questionIndex, setQuestionIndex] = useState(0)
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
+  const [answersCorrect, setAnswersCorrect] = useState(0)
+  const [feedback, setFeedback] = useState<'correct' | 'wrong' | ''>('')
+  const [progress, setProgress] = useState<SavedProgress>(readProgress)
+  const [showCodex, setShowCodex] = useState(false)
+
+  const activeWorld = worlds.find((world) => world.id === activeWorldId) ?? worlds[0]
+  const question = activeWorld.questions[questionIndex]
+  const level = Math.floor(progress.xp / 250) + 1
+  const xpInLevel = progress.xp % 250
+  const completedCount = progress.completed.length
+
+  useEffect(() => {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)) } catch { /* TV storage may be unavailable */ }
+  }, [progress])
 
   useEffect(() => {
     function handleRemoteKey(event: KeyboardEvent) {
-      const key = event.key
-
-      if (key === 'Escape' || key === 'Backspace') {
+      if (event.key === 'Escape' || event.key === 'Backspace') {
         event.preventDefault()
-        setScreen((current) =>
-          current === 'result' || current === 'mission'
-            ? 'home'
-            : current
-        )
-        return
+        if (showCodex) { setShowCodex(false); return }
+        if (screen !== 'home') { setScreen('home'); setFeedback(''); return }
       }
-
-      const directions: Record<string, string> = {
-        ArrowUp: 'up',
-        ArrowDown: 'down',
-        ArrowLeft: 'left',
-        ArrowRight: 'right',
-      }
-
-      const direction = directions[key]
-      if (!direction) return
-
-      const buttons = Array.from(
-        document.querySelectorAll<HTMLButtonElement>(
-          'button:not(:disabled)'
-        )
-      ).filter((button) => button.getClientRects().length > 0)
-
-      if (buttons.length === 0) return
-
+      const directions: Record<string, string> = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' }
+      const direction = directions[event.key]
+      if (!direction || screen === 'mission' && feedback !== '') return
+      const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>('button:not(:disabled)'))
+        .filter((button) => button.getClientRects().length > 0)
+      if (!buttons.length) return
       const active = document.activeElement
-      const current =
-        active instanceof HTMLButtonElement && buttons.includes(active)
-          ? active
-          : null
-
-      if (!current) {
-        event.preventDefault()
-        buttons[0].focus()
-        return
-      }
-
-      const currentRect = current.getBoundingClientRect()
-      const currentX = currentRect.left + currentRect.width / 2
-      const currentY = currentRect.top + currentRect.height / 2
-
-      let bestButton: HTMLButtonElement | null = null
-      let bestDistance = Infinity
-
+      const current = active instanceof HTMLButtonElement && buttons.includes(active) ? active : null
+      if (!current) { event.preventDefault(); buttons[0].focus(); return }
+      const a = current.getBoundingClientRect()
+      const ax = a.left + a.width / 2, ay = a.top + a.height / 2
+      let candidate: HTMLButtonElement | null = null, score = Infinity
       for (const button of buttons) {
         if (button === current) continue
-
-        const rect = button.getBoundingClientRect()
-        const dx = rect.left + rect.width / 2 - currentX
-        const dy = rect.top + rect.height / 2 - currentY
-
-        let primary: number
-        let secondary: number
-
-        if (direction === 'right' && dx > 1) {
-          primary = dx
-          secondary = Math.abs(dy)
-        } else if (direction === 'left' && dx < -1) {
-          primary = -dx
-          secondary = Math.abs(dy)
-        } else if (direction === 'down' && dy > 1) {
-          primary = dy
-          secondary = Math.abs(dx)
-        } else if (direction === 'up' && dy < -1) {
-          primary = -dy
-          secondary = Math.abs(dx)
-        } else {
-          continue
-        }
-
-        const distance = primary + secondary * 2
-
-        if (distance < bestDistance) {
-          bestDistance = distance
-          bestButton = button
-        }
+        const r = button.getBoundingClientRect()
+        const dx = r.left + r.width / 2 - ax, dy = r.top + r.height / 2 - ay
+        const primary = direction === 'right' ? dx : direction === 'left' ? -dx : direction === 'down' ? dy : -dy
+        const secondary = direction === 'left' || direction === 'right' ? Math.abs(dy) : Math.abs(dx)
+        if (primary <= 1) continue
+        const distance = primary + secondary * 2.4
+        if (distance < score) { score = distance; candidate = button }
       }
-
-      if (bestButton) {
-        event.preventDefault()
-        bestButton.focus()
-      }
+      if (candidate) { event.preventDefault(); candidate.focus() }
     }
-
     window.addEventListener('keydown', handleRemoteKey)
+    return () => window.removeEventListener('keydown', handleRemoteKey)
+  }, [screen, showCodex, feedback])
 
-    return () => {
-      window.removeEventListener('keydown', handleRemoteKey)
-    }
-  }, [])
-
-  function startMission() {
-    setScreen('mission')
-    setWheel('standard')
-    setTested(false)
-    setAnswer('')
-    setScore(0)
+  function startWorld(id: WorldId) {
+    setActiveWorldId(id); setQuestionIndex(0); setSelectedAnswer(null); setAnswersCorrect(0); setFeedback('')
+    setShowCodex(false); setScreen('mission')
   }
 
-  function submitAnswer() {
-    if (answer !== 'wide') {
-      setAnswer('try-again')
+  function chooseAnswer(index: number) {
+    if (feedback) return
+    setSelectedAnswer(index)
+    if (index === question.correct) { setFeedback('correct'); setAnswersCorrect((n) => n + 1) }
+    else setFeedback('wrong')
+  }
+
+  function continueMission() {
+    if (feedback === 'wrong') { setSelectedAnswer(null); setFeedback(''); return }
+    if (questionIndex < activeWorld.questions.length - 1) {
+      setQuestionIndex((n) => n + 1); setSelectedAnswer(null); setFeedback('')
       return
     }
-
-    const earnedScore = 100
-    const newBestScore = Math.max(bestScore, earnedScore)
-
-    setScore(earnedScore)
-    setBestScore(newBestScore)
-    setBadge(true)
-
-    try {
-      localStorage.setItem('brainplay-mars-badge', 'earned')
-      localStorage.setItem(
-        'brainplay-best-score',
-        String(newBestScore)
-      )
-    } catch (error) {
-      console.error('Could not save progress:', error)
-    }
-
+    const correctTotal = answersCorrect
+    const earned = 50 + correctTotal * 50
+    setProgress((previous) => ({
+      xp: previous.xp + earned,
+      completed: previous.completed.includes(activeWorldId) ? previous.completed : [...previous.completed, activeWorldId],
+      best: { ...previous.best, [activeWorldId]: Math.max(previous.best[activeWorldId] || 0, correctTotal) },
+    }))
     setScreen('result')
   }
 
-  return (
-    <main className="app">
-      <header className="topbar">
-        <button
-          className="brand brand-button"
-          onClick={() => setScreen('home')}
-        >
-          <span className="brand-icon">✦</span>
-          <span>
-            BRAINPLAY<span className="brand-light"> TV</span>
-          </span>
-        </button>
+  function resetProgress() {
+    setProgress(initialProgress)
+    try { localStorage.removeItem(STORAGE_KEY) } catch { /* ignore */ }
+  }
 
-        <span className="top-label">PLAY • DISCOVER • GROW</span>
-        <div className="profile">🧑‍🚀 EXPLORER</div>
+ 
+  return (
+    <main className={`app-shell theme-${activeWorld.planet}`}>
+      <div className="space-backdrop" aria-hidden="true"><span className="nebula nebula-a" /><span className="nebula nebula-b" /><span className="starfield" /><span className="horizon-glow" /></div>
+      <header className="topbar">
+        <button className="brand" onClick={() => { setScreen('home'); setShowCodex(false) }} aria-label="BrainPlay TV home">
+          <span className="brand-mark">B<span>✦</span></span><span className="brand-name">BRAINPLAY <i>TV</i></span>
+        </button>
+        <div className="top-nav"><span className="live-dot" /> LEARN • EXPLORE • LEVEL UP</div>
+        <button className="player-chip" onClick={() => setShowCodex(true)}><span className="avatar">✦</span><span>EXPLORER <b>LVL {level}</b></span></button>
       </header>
 
       {screen === 'home' && (
-        <>
+        <div className="home-content">
           <section className="hero">
             <div className="hero-copy">
-              <div className="eyebrow">
-                <span /> YOUR NEXT ADVENTURE STARTS HERE
+              <div className="eyebrow"><span className="eyebrow-line" /> INTERACTIVE LEARNING UNIVERSE <span className="eyebrow-dot">●</span></div>
+              <h1>THE UNIVERSE<br />IS YOUR <span>PLAYGROUND.</span></h1>
+              <p className="hero-description">Big questions. Brave experiments. Real discoveries.<br />Your next adventure starts beyond the screen.</p>
+              <div className="hero-actions">
+                <button className="primary-button" onClick={() => startWorld('cosmic')}><span>▶</span> RESUME EXPEDITION <b>↗</b></button>
+                <button className="secondary-button" onClick={() => setShowCodex(true)}>⌘ EXPLORER CODEX</button>
               </div>
-
-              <h1>
-                BIG QUESTIONS.<br />
-                <span>BRILLIANT</span><br />
-                DISCOVERIES.
-              </h1>
-
-              <p>
-                Learn something amazing. Complete a mission.
-                Unlock a new world.
-              </p>
-
-              <button
-                className="primary-button"
-                onClick={startMission}
-              >
-                ▶ &nbsp; START MARS MISSION
-              </button>
+              <div className="hero-stats">
+                <div><strong>{progress.xp.toLocaleString()}</strong><span>TOTAL XP</span></div><div className="stat-divider" />
+                <div><strong>{completedCount}<small>/4</small></strong><span>WORLDS CLEARED</span></div><div className="stat-divider" />
+                <div><strong>{level.toString().padStart(2, '0')}</strong><span>EXPLORER LEVEL</span></div>
+              </div>
             </div>
-
-            <div className="planet-scene">
-              <div className="orbit orbit-one" />
-              <div className="orbit orbit-two" />
-              <div className="planet planet-large" />
-              <div className="planet planet-small" />
-              <div className="star star-one">✦</div>
-              <div className="star star-two">✧</div>
-              <div className="star star-three">✦</div>
-              <div className="astronaut">👨‍🚀</div>
+            <div className="hero-art" aria-label="Cinematic Mars planet and rover illustration">
+              <div className="hero-orbit orbit-one" /><div className="hero-orbit orbit-two" />
+              <div className="planet-glow" /><div className="hero-planet"><div className="planet-crater crater-one" /><div className="planet-crater crater-two" /><div className="planet-crater crater-three" /><div className="planet-rim" /></div>
+              <div className="planet-ring" />
+              <div className="moon moon-one" /><div className="moon moon-two" />
+              <div className="rover-art"><div className="rover-antenna" /><div className="rover-camera" /><div className="rover-mast" /><div className="rover-top" /><div className="rover-cabin"><span>BP / 01</span></div><div className="rover-axle" /><div className="rover-wheel wheel-a" /><div className="rover-wheel wheel-b" /><div className="rover-wheel wheel-c" /><div className="rover-shadow" /></div>
+              <div className="floating-tag tag-coordinates"><span>◉</span><div><b>MISSION SITE</b><small>ARSIA MONS · 18.2°N</small></div></div>
+              <div className="floating-tag tag-signal"><span className="signal-bars">▂▅▇</span><div><b>LINK STABLE</b><small>DEEP SPACE RELAY</small></div></div>
+              <div className="art-caption"><span>FIG. 01</span><span>THE RED PLANET / SOL 001</span></div>
             </div>
+            <div className="hero-bottomline"><span>01 / 04 WORLDS ONLINE</span><span>DESIGNED FOR THE CURIOUS</span><span>SCROLL TO EXPLORE ↓</span></div>
           </section>
 
           <section className="world-section">
-            <div className="section-heading">
-              <div>
-                <div className="eyebrow">CHOOSE YOUR PATH</div>
-                <h2>Explore the worlds</h2>
-              </div>
-
-              <span className="progress">
-                ⭐ {badge ? 1 : 0} WORLDS MASTERED
-              </span>
-            </div>
-
+            <div className="section-head"><div><div className="eyebrow">SELECT YOUR DESTINATION</div><h2>Choose your <span>next world.</span></h2></div><div className="section-note"><span className="live-dot" /> FOUR WORLDS. INFINITE CURIOSITY.</div></div>
             <div className="world-grid">
-              {worlds.map((world, index) => (
-                <button
-                  key={world.name}
-                  className={`world-card ${index === 0 ? 'selected' : ''}`}
-                  style={
-                    { '--world-color': world.color } as React.CSSProperties
-                  }
-                  onClick={index === 0 ? startMission : undefined}
-                  disabled={index !== 0}
-                >
-                  <div className="card-top">
-                    <span>WORLD 0{index + 1}</span>
-                    <span className="card-status">
-                      {index === 0 && badge
-                        ? 'MASTERED ✓'
-                        : world.status}
-                    </span>
-                  </div>
-
-                  <div className="world-art">{world.emoji}</div>
-                  <h3>{world.name}</h3>
-                  <p className="world-subtitle">{world.subtitle}</p>
-                  <p className="world-description">{world.description}</p>
-
-                  <div className="card-bottom">
-                    <span>
-                      {index === 0 ? 'PLAY MISSION' : 'COMING SOON'}
-                    </span>
-                    <span>→</span>
-                  </div>
+              {worlds.map((world) => {
+                const done = progress.completed.includes(world.id)
+                return <button key={world.id} className={`world-card world-${world.id} ${done ? 'is-cleared' : ''}`} style={{ '--accent': world.accent } as React.CSSProperties} onClick={() => startWorld(world.id)}>
+                  <div className="world-card-art"><div className={`card-planet card-planet-${world.planet}`} /><div className="card-orbit" /><span className="world-emoji">{world.emoji}</span><span className="world-number">WORLD / {world.number}</span><span className="world-status">{done ? '✓ CLEARED' : '● READY TO EXPLORE'}</span></div>
+                  <div className="world-card-copy"><span className="world-category">{world.category}</span><h3>{world.name}</h3><p>{world.subtitle}</p><div className="world-card-bottom"><span>{done ? `BEST ${progress.best[world.id] ?? 0}/3` : '3 CHALLENGES'} <i>·</i> +XP</span><span className="launch-icon">↗</span></div></div>
                 </button>
-              ))}
+              })}
             </div>
           </section>
-        </>
+          <section className="progress-panel"><div className="progress-icon">✧</div><div className="progress-main"><span className="world-category">EXPLORER PROGRESSION</span><h3>Every discovery moves you forward.</h3><p>Complete missions, collect XP and build your explorer record.</p><div className="xp-track"><span style={{ width: `${(xpInLevel / 250) * 100}%` }} /></div></div><div className="progress-level"><b>{xpInLevel}<small> / 250 XP</small></b><span>LEVEL {level} → {level + 1}</span></div></section>
+        </div>
       )}
 
       {screen === 'mission' && (
-        <section className="mission">
-          <button
-            className="back-button"
-            onClick={() => setScreen('home')}
-          >
-            ← BACK TO WORLDS
-          </button>
-
-          <div className="eyebrow">
-            <span /> MISSION 01 • COSMIC FRONTIER
+        <section className="mission-screen">
+          <button className="back-link" onClick={() => setScreen('home')}>← BACK TO UNIVERSE</button>
+          <div className="mission-heading"><div><div className="eyebrow"><span className="eyebrow-line" /> WORLD {activeWorld.number} / {activeWorld.category}</div><h1>{activeWorld.name}</h1><p>{activeWorld.description}</p></div><div className="mission-progress"><span>MISSION PROGRESS</span><b>{String(questionIndex + 1).padStart(2, '0')} <i>/</i> 03</b><div className="mini-track"><span style={{ width: `${((questionIndex + (feedback ? 1 : 0)) / 3) * 100}%` }} /></div></div></div>
+          <div className={`mission-scene scene-${activeWorld.planet}`}>
+            <div className="scene-stars" /><div className="scene-planet" /><div className="scene-ridge ridge-back" /><div className="scene-ridge ridge-front" />
+            {activeWorld.id === 'cosmic' ? <div className={`scene-rover ${feedback === 'correct' ? 'rover-success' : ''}`}><div className="scene-rover-mast" /><div className="scene-rover-body"><span>BPTV</span></div><div className="scene-rover-wheel one" /><div className="scene-rover-wheel two" /><div className="scene-rover-wheel three" /></div> : <div className="scene-object">{activeWorld.emoji}</div>}
+            <div className="scene-coordinate">FIELD LOG // {activeWorld.number}-{String(questionIndex + 1).padStart(2, '0')}</div><div className="scene-message">{feedback === 'correct' ? '✓ DATA CONFIRMED' : 'AWAITING YOUR DECISION'}</div>
           </div>
-
-          <h1 className="mission-title">THE MARS ROVER CHALLENGE</h1>
-
-          <p className="mission-intro">
-            Your rover must cross a rocky Martian landscape.
-            Choose the wheels that will help it travel safely.
-          </p>
-
-          <div className="mission-layout">
-            <div className="mission-visual">
-              <div className="mars-sky">
-                <span>✦</span>
-                <span>·</span>
-                <span>✧</span>
-              </div>
-
-              <div className="mars-surface" />
-
-              <div
-                className={`rover ${
-                  wheel === 'wide' ? 'wide-wheels' : ''
-                } ${tested ? 'rover-tested' : ''}`}
-              >
-                <div className="rover-antenna" />
-                <div className="rover-body">
-                  <span>NASA</span>
-                </div>
-                <div className="rover-wheel wheel-left" />
-                <div className="rover-wheel wheel-right" />
-              </div>
-
-              {tested && (
-                <div className="test-message">
-                  {wheel === 'wide'
-                    ? '✓ ROVER CROSSED THE ROCKS!'
-                    : '⚠ ROVER GOT STUCK!'}
-                </div>
-              )}
-            </div>
-
-            <div className="mission-controls">
-              <h2>01 / Choose your wheels</h2>
-              <p>Which wheels might work best on loose sand and rocks?</p>
-
-              <button
-                className={`choice ${
-                  wheel === 'standard' ? 'choice-active' : ''
-                }`}
-                onClick={() => {
-                  setWheel('standard')
-                  setTested(false)
-                  setAnswer('')
-                }}
-              >
-                <span className="choice-icon">⚫</span>
-                <span>
-                  <strong>Standard wheels</strong>
-                  <small>Narrow wheels for smooth roads</small>
-                </span>
-                <span>{wheel === 'standard' ? '●' : '○'}</span>
-              </button>
-
-              <button
-                className={`choice ${
-                  wheel === 'wide' ? 'choice-active' : ''
-                }`}
-                onClick={() => {
-                  setWheel('wide')
-                  setTested(false)
-                  setAnswer('')
-                }}
-              >
-                <span className="choice-icon">⚙️</span>
-                <span>
-                  <strong>Wide, grippy wheels</strong>
-                  <small>More contact with the ground</small>
-                </span>
-                <span>{wheel === 'wide' ? '●' : '○'}</span>
-              </button>
-
-              <button
-                className="primary-button full-button"
-                onClick={() => {
-                  setTested(true)
-                  setAnswer('')
-                }}
-              >
-                ▶ TEST MY ROVER
-              </button>
-
-              {tested && (
-                <div
-                  className={`feedback ${
-                    wheel === 'wide'
-                      ? 'feedback-good'
-                      : 'feedback-warn'
-                  }`}
-                >
-                  {wheel === 'wide'
-                    ? 'Great engineering! Wider wheels can improve grip and help spread the rover’s weight on loose ground.'
-                    : 'The narrow wheels struggle on loose terrain. Try wheels with a wider contact area.'}
-                </div>
-              )}
+          <div className="challenge-layout"><div className="challenge-intro"><span className="world-category">CHALLENGE {String(questionIndex + 1).padStart(2, '0')}</span><h2>{question.prompt}</h2><p>Think it through, explorer. Choose your answer using the remote.</p><div className="challenge-tip"><span>✦</span><p><b>FIELD NOTE</b><br />Curiosity is your most powerful tool. Every answer reveals something new.</p></div></div>
+            <div className="answer-panel"><div className="answer-panel-head"><span>SELECT ONE ANSWER</span><span>{selectedAnswer === null ? '● READY' : feedback === 'correct' ? '✓ CORRECT' : '↻ TRY AGAIN'}</span></div>
+              <div className="answer-list">{question.answers.map((answer, index) => <button key={answer} className={`answer-option ${selectedAnswer === index ? (feedback === 'correct' ? 'answer-correct' : 'answer-wrong') : ''}`} disabled={!!feedback} onClick={() => chooseAnswer(index)}><span className="answer-letter">{String.fromCharCode(65 + index)}</span><span>{answer}</span><span className="answer-indicator">{selectedAnswer === index ? (feedback === 'correct' ? '✓' : '×') : '↗'}</span></button>)}</div>
+              {feedback && <div className={`answer-feedback ${feedback}`}><b>{feedback === 'correct' ? 'NICE WORK, EXPLORER.' : 'NOT QUITE — TRY AGAIN.'}</b><p>{feedback === 'correct' ? question.fact : 'Reconsider the choices and select a different answer.'}</p><button className="primary-button" onClick={continueMission}>{feedback === 'wrong' ? 'TRY AGAIN' : questionIndex === 2 ? 'COMPLETE MISSION' : 'NEXT CHALLENGE'} <b>→</b></button></div>}
             </div>
           </div>
-
-          {tested && wheel === 'wide' && (
-            <div className="quiz">
-              <div className="eyebrow">02 / SCIENCE CHECK</div>
-              <h2>
-                Why can wider wheels help a rover on loose ground?
-              </h2>
-              <p>
-                Choose the best explanation to earn your explorer badge.
-              </p>
-
-              {[
-                {
-                  value: 'speed',
-                  label: 'They make the rover fly over rocks.',
-                },
-                {
-                  value: 'wide',
-                  label:
-                    'They spread the rover’s weight over a larger area and can improve traction.',
-                },
-                {
-                  value: 'color',
-                  label: 'They change the colour of the Martian soil.',
-                },
-              ].map((option) => (
-                <button
-                  key={option.value}
-                  className={`quiz-option ${
-                    answer === option.value ? 'quiz-selected' : ''
-                  }`}
-                  onClick={() => setAnswer(option.value)}
-                >
-                  {option.label}
-                </button>
-              ))}
-
-              {answer === 'try-again' && (
-                <p className="quiz-error">
-                  Not quite! Think about grip and how weight is spread
-                  over the ground.
-                </p>
-              )}
-
-              <button
-                className="primary-button"
-                disabled={!answer || answer === 'try-again'}
-                onClick={submitAnswer}
-              >
-                SUBMIT ANSWER →
-              </button>
-            </div>
-          )}
         </section>
       )}
 
       {screen === 'result' && (
-        <section className="result-screen">
-          <div className="badge-medal">🏅</div>
-          <div className="eyebrow">MISSION COMPLETE</div>
-          <h1>YOU DID IT, EXPLORER!</h1>
-
-          <div className="earned-badge">
-            ⭐ SCORE: {score} POINTS
-          </div>
-
-          <p className="result-note">
-            🏆 PERSONAL BEST: {bestScore} POINTS
-          </p>
-
-          <p>
-            You tested a design, learned about traction, and solved
-            a science challenge.
-          </p>
-
-          <div className="earned-badge">
-            🚀 MARS ROVER ENGINEER
-          </div>
-
-          <p className="result-note">
-            You unlocked your learning badge by demonstrating what
-            you learned — not by watching longer.
-          </p>
-
-          <button className="primary-button" onClick={startMission}>
-            ↻ PLAY AGAIN
-          </button>
-
-          <button
-            className="back-button"
-            onClick={() => setScreen('home')}
-          >
-            RETURN TO WORLDS →
-          </button>
-        </section>
+        <section className="result-screen"><div className="result-visual"><div className="result-halo" /><div className="result-medal">✦</div><span className="result-spark spark-a">✧</span><span className="result-spark spark-b">✦</span></div><div className="eyebrow"><span className="eyebrow-line" /> EXPEDITION REPORT / FILED</div><h1>MISSION <span>ACCOMPLISHED.</span></h1><p className="result-copy">You explored {activeWorld.name.toLowerCase()}, tested your thinking and unlocked a new discovery.</p><div className="result-stats"><div><span>XP EARNED</span><b>+{50 + (progress.best[activeWorldId] ?? answersCorrect) * 50}</b></div><div><span>QUESTIONS MASTERED</span><b>{progress.best[activeWorldId] ?? answersCorrect}<small> / 3</small></b></div><div><span>EXPLORER LEVEL</span><b>{level.toString().padStart(2, '0')}</b></div></div><div className="result-actions"><button className="primary-button" onClick={() => startWorld(activeWorldId)}>REPLAY WORLD <b>↻</b></button><button className="secondary-button" onClick={() => setScreen('home')}>RETURN TO UNIVERSE <b>→</b></button></div></section>
       )}
 
-      <footer className="footer">
-        <span>✦ BRAINPLAY TV</span>
-        <span>LEARN IT. PROVE IT. UNLOCK IT.</span>
-      </footer>
+      {showCodex && <div className="modal-backdrop" role="presentation" onClick={() => setShowCodex(false)}><section className="codex-modal" role="dialog" aria-modal="true" aria-label="Explorer codex" onClick={(event) => event.stopPropagation()}><button className="modal-close" onClick={() => setShowCodex(false)}>✕</button><div className="eyebrow">PERSONAL EXPLORER RECORD</div><h2>Explorer <span>Codex.</span></h2><div className="codex-level"><div className="codex-avatar">✦</div><div><b>LEVEL {level} EXPLORER</b><span>{progress.xp.toLocaleString()} TOTAL EXPERIENCE POINTS</span></div></div><div className="codex-xp"><div><span>LEVEL PROGRESS</span><b>{xpInLevel} / 250 XP</b></div><div className="xp-track"><span style={{ width: `${(xpInLevel / 250) * 100}%` }} /></div></div><div className="codex-worlds">{worlds.map((world) => <div key={world.id}><span>{world.emoji}</span><b>{world.name}</b><small>{progress.completed.includes(world.id) ? `CLEARED · BEST ${progress.best[world.id] ?? 0}/3` : 'NOT YET CLEARED'}</small></div>)}</div><button className="reset-button" onClick={resetProgress}>RESET LOCAL PROGRESS</button></section></div>}
+
+      <footer className="footer"><span><b>BRAINPLAY</b> TV <i>EXPLORATION SYSTEMS / 01.0</i></span><span>BUILT FOR THE CURIOUS <b>✦</b></span></footer>
     </main>
   )
 }
