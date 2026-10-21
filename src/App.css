@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
 :root {
@@ -10,18 +11,28 @@
   -moz-osx-font-smoothing: grayscale;
   font-optical-sizing: auto;
   font-weight: 400;
+
   --muted: #a5a6c4;
   --panel: #111328;
+  --purple: #a998ff;
+  --purple-dark: #6047dc;
+  --border: #ffffff20;
 }
 
 * {
   box-sizing: border-box;
 }
 
+html {
+  min-width: 320px;
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden;
   background:
     radial-gradient(ellipse at 80% 5%, #222054 0%, transparent 35%),
     radial-gradient(ellipse at 0% 70%, #151a3a 0%, transparent 40%),
@@ -32,7 +43,22 @@ button {
   font: inherit;
   color: inherit;
   cursor: pointer;
-  background-color: transparent;
+  background: transparent;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+button:focus-visible {
+  outline: 4px solid #ffffff;
+  outline-offset: 4px;
+  box-shadow: 0 0 0 7px #a998ff70, 0 0 24px #a998ff65;
+  position: relative;
+  z-index: 5;
 }
 
 .app {
@@ -43,7 +69,7 @@ button {
 }
 
 .topbar {
-  height: 82px;
+  min-height: 82px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -55,6 +81,8 @@ button {
   display: flex;
   align-items: center;
   gap: 10px;
+  border: 0;
+  padding: 6px 0;
   font-family: 'Orbitron', sans-serif;
   font-weight: 800;
   letter-spacing: 1.5px;
@@ -62,12 +90,16 @@ button {
 }
 
 .brand-icon {
-  color: #a998ff;
+  color: var(--purple);
   font-size: 29px;
 }
 
 .brand-light {
-  color: #a998ff;
+  color: var(--purple);
+}
+
+.brand-button:focus:not(:focus-visible) {
+  outline: none;
 }
 
 .top-label,
@@ -80,12 +112,9 @@ button {
 
 .profile {
   padding: 10px 14px;
-  border: 1px solid #ffffff20;
+  border: 1px solid var(--border);
   border-radius: 30px;
-}
-
-.profile span {
-  margin-right: 7px;
+  white-space: nowrap;
 }
 
 .hero {
@@ -111,10 +140,12 @@ button {
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 2px;
+  line-height: 1.7;
 }
 
 .eyebrow > span {
   display: inline-block;
+  flex: 0 0 7px;
   width: 7px;
   height: 7px;
   border-radius: 50%;
@@ -129,15 +160,11 @@ button {
   line-height: 1.25;
   letter-spacing: -1px;
   font-weight: 800;
-  color: #F5F3FF;
+  color: #f5f3ff;
 }
 
 .hero h1 span {
-  color: #A998FF;
-}
-
-.hero h1 span {
-  color: #a998ff;
+  color: var(--purple);
 }
 
 .hero-copy > p {
@@ -148,21 +175,23 @@ button {
 }
 
 .primary-button {
+  display: inline-block;
+  min-height: 48px;
   margin-top: 17px;
   padding: 14px 21px;
-  border: 0;
+  border: 1px solid transparent;
   border-radius: 8px;
   background: linear-gradient(110deg, #8c6bff, #6047dc);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.6px;
   box-shadow: 0 8px 28px #7155ff30;
+  transition: transform 160ms ease, filter 160ms ease;
 }
 
-.primary-button:focus-visible,
-.world-card:focus-visible {
-  outline: 3px solid white;
-  outline-offset: 4px;
+.primary-button:hover:not(:disabled) {
+  filter: brightness(1.14);
+  transform: translateY(-2px);
 }
 
 .planet-scene {
@@ -260,7 +289,7 @@ button {
   margin: 8px 0 0;
   font-family: 'Orbitron', sans-serif;
   font-size: clamp(20px, 2.4vw, 29px);
-  color: #F5F3FF;
+  color: #f5f3ff;
 }
 
 .progress {
@@ -272,6 +301,7 @@ button {
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.6px;
+  white-space: nowrap;
 }
 
 .world-grid {
@@ -291,11 +321,15 @@ button {
   transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
 }
 
-.world-card:hover,
+.world-card:hover:not(:disabled),
 .world-card.selected {
   border-color: var(--world-color);
   transform: translateY(-3px);
-  background: linear-gradient(150deg, color-mix(in srgb, var(--world-color) 15%, #171a34), #101224 85%);
+  background: linear-gradient(
+    150deg,
+    color-mix(in srgb, var(--world-color) 15%, #171a34),
+    #101224 85%
+  );
 }
 
 .card-top,
@@ -372,6 +406,368 @@ button {
   color: #b5a7ff;
 }
 
+/* Mission screen */
+
+.mission {
+  padding: 28px 0 44px;
+}
+
+.back-button {
+  display: inline-block;
+  min-height: 44px;
+  padding: 12px 16px;
+  border: 1px solid #ffffff25;
+  border-radius: 10px;
+  background: #171a32;
+  color: #f5f3ff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.back-button:hover {
+  border-color: var(--purple);
+}
+
+.mission > .eyebrow {
+  margin-top: 24px;
+}
+
+.mission-title {
+  margin: 14px 0;
+  color: #f5f3ff;
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(24px, 3.2vw, 40px);
+  line-height: 1.35;
+}
+
+.mission-intro {
+  max-width: 760px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.mission-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(300px, 0.9fr);
+  align-items: start;
+  gap: 28px;
+  margin-top: 28px;
+}
+
+.mission-visual {
+  position: relative;
+  min-height: 300px;
+  overflow: hidden;
+  border: 1px solid #ffffff20;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #171638, #351c50 72%, #71384c);
+}
+
+.mars-sky {
+  position: absolute;
+  inset: 20px 24px auto;
+  display: flex;
+  justify-content: space-between;
+  color: #e6dfff;
+  font-size: 24px;
+}
+
+.mars-surface {
+  position: absolute;
+  left: -8%;
+  right: -8%;
+  bottom: -40px;
+  height: 125px;
+  border-radius: 50% 50% 0 0;
+  background: linear-gradient(180deg, #c56a62, #703447);
+}
+
+.rover {
+  position: absolute;
+  left: 50%;
+  bottom: 100px;
+  width: 130px;
+  height: 100px;
+  transform: translateX(-50%);
+  transition: bottom 220ms ease;
+}
+
+.rover-body {
+  position: absolute;
+  left: 25px;
+  top: 28px;
+  display: grid;
+  place-items: center;
+  width: 80px;
+  height: 43px;
+  border: 3px solid #c7c8e7;
+  border-radius: 8px;
+  background: linear-gradient(145deg, #e7e9f7, #74799e);
+  color: #25294c;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.rover-antenna {
+  position: absolute;
+  left: 62px;
+  top: 4px;
+  width: 4px;
+  height: 27px;
+  background: #d8d9ee;
+}
+
+.rover-wheel {
+  position: absolute;
+  top: 64px;
+  width: 28px;
+  height: 28px;
+  border: 4px solid #d6d8e9;
+  border-radius: 50%;
+  background: #282b47;
+}
+
+.wheel-left {
+  left: 27px;
+}
+
+.wheel-right {
+  right: 27px;
+}
+
+.rover.wide-wheels .rover-wheel {
+  width: 36px;
+  height: 36px;
+  border-width: 5px;
+}
+
+.rover-tested {
+  bottom: 115px;
+}
+
+.test-message {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 14px;
+  text-align: center;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+}
+
+.mission-controls {
+  min-width: 0;
+  padding: 22px;
+  border: 1px solid #ffffff1b;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #171a34, #101224);
+}
+
+.mission-controls h2,
+.quiz h2 {
+  color: #f5f3ff;
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(17px, 2vw, 22px);
+  line-height: 1.5;
+}
+
+.mission-controls > p,
+.quiz > p {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 68px;
+  margin: 12px 0;
+  padding: 14px;
+  text-align: left;
+  border: 1px solid #ffffff25;
+  border-radius: 10px;
+  background: #171a32;
+  color: #f5f3ff;
+}
+
+.choice > span:nth-child(2) {
+  flex: 1;
+}
+
+.choice strong,
+.choice small {
+  display: block;
+}
+
+.choice strong {
+  color: #ffffff;
+}
+
+.choice small {
+  margin-top: 5px;
+  color: #b7b8d4;
+  line-height: 1.5;
+}
+
+.choice-active {
+  border: 2px solid var(--purple);
+  background: #8c6bff25;
+}
+
+.choice:hover {
+  border-color: var(--purple);
+}
+
+.choice-icon {
+  font-size: 23px;
+}
+
+.full-button {
+  width: 100%;
+}
+
+.feedback {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.feedback-good {
+  border: 1px solid #36c99a70;
+  background: #23a87918;
+  color: #a4f4d8;
+}
+
+.feedback-warn {
+  border: 1px solid #ffb86b70;
+  background: #ee984018;
+  color: #ffdda9;
+}
+
+/* Science quiz */
+
+.quiz {
+  max-width: 900px;
+  margin-top: 28px;
+  padding: 24px;
+  border: 1px solid #a998ff40;
+  border-radius: 16px;
+  background: #111328;
+}
+
+.quiz .eyebrow {
+  margin-bottom: 12px;
+}
+
+.quiz-option {
+  display: block;
+  width: 100%;
+  min-height: 52px;
+  margin: 10px 0;
+  padding: 14px;
+  text-align: left;
+  white-space: normal;
+  line-height: 1.6;
+  border: 1px solid #ffffff25;
+  border-radius: 10px;
+  background: #171a32;
+  color: #f5f3ff;
+}
+
+.quiz-option:hover {
+  border-color: var(--purple);
+}
+
+.quiz-selected {
+  border: 2px solid var(--purple);
+  background: #8c6bff25;
+}
+
+.quiz-error {
+  color: #ffb7b7;
+  line-height: 1.6;
+}
+
+.quiz .primary-button {
+  margin-top: 12px;
+}
+
+/* Mission result */
+
+.result-screen {
+  min-height: 520px;
+  padding: 55px 20px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.result-screen .eyebrow {
+  justify-content: center;
+}
+
+.badge-medal {
+  font-size: 65px;
+  filter: drop-shadow(0 8px 20px #a998ff40);
+}
+
+.result-screen h1 {
+  margin: 8px 0;
+  color: #f5f3ff;
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(25px, 4vw, 42px);
+  line-height: 1.4;
+}
+
+.result-screen > p {
+  max-width: 650px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.result-screen .earned-badge {
+  max-width: 100%;
+  padding: 12px 18px;
+  border: 1px solid #a998ff50;
+  border-radius: 12px;
+  background: #a998ff12;
+  color: #e5deff;
+  font-weight: 800;
+  line-height: 1.6;
+}
+
+.result-screen .primary-button,
+.result-screen .back-button {
+  margin-top: 8px;
+}
+
+/* Responsive layouts */
+
+@media (min-width: 1200px) {
+  .hero {
+    min-height: 390px;
+  }
+
+  .world-card {
+    min-height: 280px;
+    padding: 20px;
+  }
+
+  .mission-visual {
+    min-height: 360px;
+  }
+}
+
 @media (max-width: 900px) {
   .world-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -399,17 +795,34 @@ button {
   }
 }
 
+@media (max-width: 750px) {
+  .mission-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mission-visual {
+    min-height: 270px;
+  }
+
+  .mission-controls,
+  .quiz {
+    padding: 18px;
+  }
+}
+
 @media (max-width: 600px) {
   .app {
     padding: 0 18px;
   }
 
   .topbar {
-    height: 68px;
+    min-height: 68px;
+    gap: 10px;
   }
 
   .brand {
     font-size: 14px;
+    letter-spacing: 0.7px;
   }
 
   .top-label {
@@ -417,8 +830,8 @@ button {
   }
 
   .profile {
-    font-size: 9px;
     padding: 8px 10px;
+    font-size: 9px;
   }
 
   .hero {
@@ -435,7 +848,7 @@ button {
   }
 
   .section-heading {
-    align-items: start;
+    align-items: flex-start;
     flex-direction: column;
   }
 
@@ -448,112 +861,23 @@ button {
   }
 
   .footer {
-    align-items: start;
+    align-items: flex-start;
     justify-content: center;
     flex-direction: column;
     padding: 18px 0;
   }
-}
-/* BrainPlay TV mission screen fixes */
-.mission-title,
-.mission-controls h2,
-.quiz h2 {
-  color: #f5f3ff !important;
-}
 
-.back-button,
-.choice,
-.quiz-option {
-  color: #f5f3ff !important;
-  background: #171a32 !important;
-  border: 1px solid #ffffff25;
-  border-radius: 10px;
-}
-
-.back-button {
-  display: inline-block;
-  padding: 12px 16px;
-}
-
-.choice {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  margin: 12px 0;
-  padding: 14px;
-  text-align: left;
-}
-
-.choice-active,
-.quiz-selected {
-  border: 2px solid #a998ff !important;
-  background: #8c6bff25 !important;
-}
-
-.choice strong {
-  color: #ffffff;
-}
-
-.choice small {
-  color: #b7b8d4;
-}
-
-.quiz-option {
-  display: block;
-  width: 100%;
-  margin: 10px 0;
-  padding: 14px;
-  text-align: left;
-  white-space: normal;
-}
-
-.quiz-option:hover,
-.choice:hover,
-.back-button:hover {
-  border-color: #a998ff;
-}
-
-.mission-controls {
-  min-width: 0;
-}
-
-.mission-layout {
-  align-items: start;
-}
-
-.quiz {
-  max-width: 900px;
-}
-
-.quiz .primary-button {
-  margin-top: 12px;
-}
-
-@media (max-width: 750px) {
-  .mission-layout {
-    grid-template-columns: minmax(0, 1fr);
+  .result-screen {
+    padding: 35px 5px;
   }
 }
 
-.result-screen h1 {
-  color: #F5F3FF !important;
-}
-
-.brand-button:focus-visible {
-  outline: 2px solid #A998FF;
-  outline-offset: 4px;
-}
-
-.brand-button:focus:not(:focus-visible) {
-  outline: none;
-}
-
-.result-screen {
-  min-height: 520px;
-  padding: 55px 20px;
-}
-
-.result-screen .eyebrow {
-  justify-content: center;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }
