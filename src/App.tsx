@@ -75,14 +75,10 @@ function App() {
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | ''>('')
   const [progress, setProgress] = useState<SavedProgress>(readProgress)
   const [showCodex, setShowCodex] = useState(false)
-  const [aiQuestion, setAiQuestion] = useState<Question | null>(null)
-  const [isAiQuiz, setIsAiQuiz] = useState(false)
-  const [aiLoading, setAiLoading] = useState(false)
-  const [aiError, setAiError] = useState('')
 
   const activeWorld = worlds.find((world) => world.id === activeWorldId) ?? worlds[0]
-  const question = isAiQuiz && aiQuestion ? aiQuestion : activeWorld.questions[questionIndex]
-  const currentQuestionCount = isAiQuiz ? 1 : activeWorld.questions.length
+  const [aiQuestions, setAiQuestions] = useState<Record<string, Question>>({})
+  const question = aiQuestions[activeWorldId] ?? activeWorld.questions[questionIndex]
   const level = Math.floor(progress.xp / 250) + 1
   const xpInLevel = progress.xp % 250
   const completedCount = progress.completed.length
@@ -126,58 +122,24 @@ function App() {
     return () => window.removeEventListener('keydown', handleRemoteKey)
   }, [screen, showCodex, feedback])
 
-  async function startAiQuiz() {
-    if (aiLoading) return
-    setAiLoading(true)
-    setAiError('')
-    setIsAiQuiz(true)
-    setAiQuestion(null)
-    setQuestionIndex(0)
-    setSelectedAnswer(null)
-    setAnswersCorrect(0)
-    setFeedback('')
-    setShowCodex(false)
-
+  async function startWorld(id: WorldId) {
+    setActiveWorldId(id); setQuestionIndex(0); setSelectedAnswer(null); setAnswersCorrect(0); setFeedback('')
+    setShowCodex(false); setScreen('mission')
     try {
       const response = await fetch('/api/quiz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ world: activeWorldId, difficulty: 'medium' }),
+        body: JSON.stringify({ world: id, difficulty: 'medium' })
       })
-      if (!response.ok) {
-        const details = await response.text()
-        throw new Error(details || `Quiz service returned ${response.status}`)
+      if (response.ok) {
+        const q = await response.json()
+        if (q.prompt && Array.isArray(q.answers) && q.answers.length === 4 && Number.isInteger(q.correct) && q.correct >= 0 && q.correct < 4 && q.fact) {
+          setAiQuestions(previous => ({ ...previous, [id]: q }))
+        }
       }
-      const data = await response.json()
-      if (
-        typeof data.prompt !== 'string' ||
-        !Array.isArray(data.answers) ||
-        data.answers.length !== 4 ||
-        !Number.isInteger(data.correct) ||
-        data.correct < 0 ||
-        data.correct > 3 ||
-        typeof data.fact !== 'string'
-      ) {
-        throw new Error('The quiz service returned an invalid question.')
-      }
-      setAiQuestion({
-        prompt: data.prompt,
-        answers: data.answers,
-        correct: data.correct,
-        fact: data.fact,
-      })
-      setScreen('mission')
     } catch (error) {
-      setAiError(error instanceof Error ? error.message : 'Could not load an AI question.')
-    } finally {
-      setAiLoading(false)
+      console.error('AI quiz unavailable; using built-in questions.', error)
     }
-  }
-
-  function startWorld(id: WorldId) {
-    setIsAiQuiz(false); setAiQuestion(null); setAiError('')
-    setActiveWorldId(id); setQuestionIndex(0); setSelectedAnswer(null); setAnswersCorrect(0); setFeedback('')
-    setShowCodex(false); setScreen('mission')
   }
 
   function chooseAnswer(index: number) {
@@ -189,16 +151,11 @@ function App() {
 
   function continueMission() {
     if (feedback === 'wrong') { setSelectedAnswer(null); setFeedback(''); return }
-    if (questionIndex < currentQuestionCount - 1) {
+    if (questionIndex < activeWorld.questions.length - 1) {
       setQuestionIndex((n) => n + 1); setSelectedAnswer(null); setFeedback('')
       return
     }
     const correctTotal = answersCorrect
-    if (isAiQuiz) {
-      setProgress((previous) => ({ ...previous, xp: previous.xp + (correctTotal > 0 ? 100 : 50) }))
-      setScreen('result')
-      return
-    }
     const earned = 50 + correctTotal * 50
     setProgress((previous) => ({
       xp: previous.xp + earned,
@@ -233,13 +190,9 @@ function App() {
               <h1>THE UNIVERSE<br />IS YOUR <span>PLAYGROUND.</span></h1>
               <p className="hero-description">Big questions. Brave experiments. Real discoveries.<br />Your next adventure starts beyond the screen.</p>
               <div className="hero-actions">
-                <button className="secondary-button" onClick={startAiQuiz} disabled={aiLoading}>
-                  {aiLoading ? 'GENERATING QUESTION...' : 'AI QUIZ'}
-                </button>
                 <button className="primary-button" onClick={() => startWorld('cosmic')}><span>â–¶</span> RESUME EXPEDITION <b>â†—</b></button>
                 <button className="secondary-button" onClick={() => setShowCodex(true)}>âŒ˜ EXPLORER CODEX</button>
               </div>
-              {aiError && <p role="alert" className="answer-feedback wrong">{aiError}</p>}
               <div className="hero-stats">
                 <div><strong>{progress.xp.toLocaleString()}</strong><span>TOTAL XP</span></div><div className="stat-divider" />
                 <div><strong>{completedCount}<small>/4</small></strong><span>WORLDS CLEARED</span></div><div className="stat-divider" />
@@ -278,7 +231,7 @@ function App() {
       {screen === 'mission' && (
         <section className="mission-screen">
           <button className="back-link" onClick={() => setScreen('home')}>â† BACK TO UNIVERSE</button>
-          <div className="mission-heading"><div><div className="eyebrow"><span className="eyebrow-line" /> {isAiQuiz ? 'AI GENERATED CHALLENGE' : `WORLD ${activeWorld.number} / ${activeWorld.category}` }</div><h1>{isAiQuiz ? 'AI DISCOVERY QUIZ' : activeWorld.name}</h1><p>{isAiQuiz ? 'A fresh question generated for your exploration.' : activeWorld.description}</p></div><div className="mission-progress"><span>MISSION PROGRESS</span><b>{String(questionIndex + 1).padStart(2, '0')} <i>/</i> {String(currentQuestionCount).padStart(2, '0')}</b><div className="mini-track"><span style={{ width: `${((questionIndex + (feedback ? 1 : 0)) / currentQuestionCount) * 100}%` }} /></div></div></div>
+          <div className="mission-heading"><div><div className="eyebrow"><span className="eyebrow-line" /> WORLD {activeWorld.number} / {activeWorld.category}</div><h1>{activeWorld.name}</h1><p>{activeWorld.description}</p></div><div className="mission-progress"><span>MISSION PROGRESS</span><b>{String(questionIndex + 1).padStart(2, '0')} <i>/</i> 03</b><div className="mini-track"><span style={{ width: `${((questionIndex + (feedback ? 1 : 0)) / 3) * 100}%` }} /></div></div></div>
           <div className={`mission-scene scene-${activeWorld.planet}`}>
             <div className="scene-stars" /><div className="scene-planet" /><div className="scene-ridge ridge-back" /><div className="scene-ridge ridge-front" />
             {activeWorld.id === 'cosmic' ? <div className={`scene-rover ${feedback === 'correct' ? 'rover-success' : ''}`}><div className="scene-rover-mast" /><div className="scene-rover-body"><span>BPTV</span></div><div className="scene-rover-wheel one" /><div className="scene-rover-wheel two" /><div className="scene-rover-wheel three" /></div> : <div className="scene-object">{activeWorld.emoji}</div>}
@@ -287,14 +240,14 @@ function App() {
           <div className="challenge-layout"><div className="challenge-intro"><span className="world-category">CHALLENGE {String(questionIndex + 1).padStart(2, '0')}</span><h2>{question.prompt}</h2><p>Think it through, explorer. Choose your answer using the remote.</p><div className="challenge-tip"><span>âœ¦</span><p><b>FIELD NOTE</b><br />Curiosity is your most powerful tool. Every answer reveals something new.</p></div></div>
             <div className="answer-panel"><div className="answer-panel-head"><span>SELECT ONE ANSWER</span><span>{selectedAnswer === null ? 'â— READY' : feedback === 'correct' ? 'âœ“ CORRECT' : 'â†» TRY AGAIN'}</span></div>
               <div className="answer-list">{question.answers.map((answer, index) => <button key={answer} className={`answer-option ${selectedAnswer === index ? (feedback === 'correct' ? 'answer-correct' : 'answer-wrong') : ''}`} disabled={!!feedback} onClick={() => chooseAnswer(index)}><span className="answer-letter">{String.fromCharCode(65 + index)}</span><span>{answer}</span><span className="answer-indicator">{selectedAnswer === index ? (feedback === 'correct' ? 'âœ“' : 'Ã—') : 'â†—'}</span></button>)}</div>
-              {feedback && <div className={`answer-feedback ${feedback}`}><b>{feedback === 'correct' ? 'NICE WORK, EXPLORER.' : 'NOT QUITE â€” TRY AGAIN.'}</b><p>{feedback === 'correct' ? question.fact : 'Reconsider the choices and select a different answer.'}</p><button className="primary-button" onClick={continueMission}>{feedback === 'wrong' ? 'TRY AGAIN' : questionIndex === currentQuestionCount - 1 ? (isAiQuiz ? 'FINISH AI QUIZ' : 'COMPLETE MISSION') : 'NEXT CHALLENGE'} <b>â†’</b></button></div>}
+              {feedback && <div className={`answer-feedback ${feedback}`}><b>{feedback === 'correct' ? 'NICE WORK, EXPLORER.' : 'NOT QUITE â€” TRY AGAIN.'}</b><p>{feedback === 'correct' ? question.fact : 'Reconsider the choices and select a different answer.'}</p><button className="primary-button" onClick={continueMission}>{feedback === 'wrong' ? 'TRY AGAIN' : questionIndex === 2 ? 'COMPLETE MISSION' : 'NEXT CHALLENGE'} <b>â†’</b></button></div>}
             </div>
           </div>
         </section>
       )}
 
       {screen === 'result' && (
-        <section className="result-screen"><div className="result-visual"><div className="result-halo" /><div className="result-medal">âœ¦</div><span className="result-spark spark-a">âœ§</span><span className="result-spark spark-b">âœ¦</span></div><div className="eyebrow"><span className="eyebrow-line" /> EXPEDITION REPORT / FILED</div><h1>MISSION <span>ACCOMPLISHED.</span></h1><p className="result-copy">You explored {activeWorld.name.toLowerCase()}, tested your thinking and unlocked a new discovery.</p><div className="result-stats"><div><span>XP EARNED</span><b>+{isAiQuiz ? (answersCorrect > 0 ? 100 : 50) : 50 + (progress.best[activeWorldId] ?? answersCorrect) * 50}</b></div><div><span>QUESTIONS MASTERED</span><b>{isAiQuiz ? answersCorrect : (progress.best[activeWorldId] ?? answersCorrect)}<small> / {currentQuestionCount}</small></b></div><div><span>EXPLORER LEVEL</span><b>{level.toString().padStart(2, '0')}</b></div></div><div className="result-actions"><button className="primary-button" onClick={() => isAiQuiz ? startAiQuiz() : startWorld(activeWorldId)}>{isAiQuiz ? 'NEW AI QUESTION' : 'REPLAY WORLD'} <b>â†»</b></button><button className="secondary-button" onClick={() => setScreen('home')}>RETURN TO UNIVERSE <b>â†’</b></button></div></section>
+        <section className="result-screen"><div className="result-visual"><div className="result-halo" /><div className="result-medal">âœ¦</div><span className="result-spark spark-a">âœ§</span><span className="result-spark spark-b">âœ¦</span></div><div className="eyebrow"><span className="eyebrow-line" /> EXPEDITION REPORT / FILED</div><h1>MISSION <span>ACCOMPLISHED.</span></h1><p className="result-copy">You explored {activeWorld.name.toLowerCase()}, tested your thinking and unlocked a new discovery.</p><div className="result-stats"><div><span>XP EARNED</span><b>+{50 + (progress.best[activeWorldId] ?? answersCorrect) * 50}</b></div><div><span>QUESTIONS MASTERED</span><b>{progress.best[activeWorldId] ?? answersCorrect}<small> / 3</small></b></div><div><span>EXPLORER LEVEL</span><b>{level.toString().padStart(2, '0')}</b></div></div><div className="result-actions"><button className="primary-button" onClick={() => startWorld(activeWorldId)}>REPLAY WORLD <b>â†»</b></button><button className="secondary-button" onClick={() => setScreen('home')}>RETURN TO UNIVERSE <b>â†’</b></button></div></section>
       )}
 
       {showCodex && <div className="modal-backdrop" role="presentation" onClick={() => setShowCodex(false)}><section className="codex-modal" role="dialog" aria-modal="true" aria-label="Explorer codex" onClick={(event) => event.stopPropagation()}><button className="modal-close" onClick={() => setShowCodex(false)}>âœ•</button><div className="eyebrow">PERSONAL EXPLORER RECORD</div><h2>Explorer <span>Codex.</span></h2><div className="codex-level"><div className="codex-avatar">âœ¦</div><div><b>LEVEL {level} EXPLORER</b><span>{progress.xp.toLocaleString()} TOTAL EXPERIENCE POINTS</span></div></div><div className="codex-xp"><div><span>LEVEL PROGRESS</span><b>{xpInLevel} / 250 XP</b></div><div className="xp-track"><span style={{ width: `${(xpInLevel / 250) * 100}%` }} /></div></div><div className="codex-worlds">{worlds.map((world) => <div key={world.id}><span>{world.emoji}</span><b>{world.name}</b><small>{progress.completed.includes(world.id) ? `CLEARED Â· BEST ${progress.best[world.id] ?? 0}/3` : 'NOT YET CLEARED'}</small></div>)}</div><button className="reset-button" onClick={resetProgress}>RESET LOCAL PROGRESS</button></section></div>}
@@ -305,4 +258,7 @@ function App() {
 }
 
 export default App
+
+
+
 
