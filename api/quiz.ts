@@ -4,109 +4,50 @@ const fallbackQuestions: Record<
   { prompt: string; answers: string[]; correct: number; fact: string }[]
 > = {
   cosmic: [
-    {
-      prompt: "Which planet is known as the Red Planet?",
-      answers: ["Earth", "Mars", "Jupiter", "Venus"],
-      correct: 1,
-      fact: "Mars appears red because its surface contains iron oxide.",
-    },
-    {
-      prompt: "Which planet has the most prominent ring system?",
-      answers: ["Mercury", "Saturn", "Mars", "Earth"],
-      correct: 1,
-      fact: "Saturn's rings are made mainly of ice and rocky material.",
-    },
-    {
-      prompt: "What is the closest star to Earth?",
-      answers: ["Sirius", "The Sun", "Polaris", "Proxima Centauri"],
-      correct: 1,
-      fact: "The Sun is the closest star to Earth.",
-    },
+    { prompt: "Which planet is known as the Red Planet?", answers: ["Earth", "Mars", "Jupiter", "Venus"], correct: 1, fact: "Mars appears red because its surface contains iron oxide." },
+    { prompt: "Which planet has the most prominent ring system?", answers: ["Mercury", "Saturn", "Mars", "Earth"], correct: 1, fact: "Saturn's rings are made mainly of ice and rocky material." },
+    { prompt: "What is the closest star to Earth?", answers: ["Sirius", "The Sun", "Polaris", "Proxima Centauri"], correct: 1, fact: "The Sun is the closest star to Earth." },
   ],
   wild: [
-    {
-      prompt: "Which is the largest land animal?",
-      answers: ["Giraffe", "African elephant", "Rhinoceros", "Hippopotamus"],
-      correct: 1,
-      fact: "The African elephant is the largest living land animal.",
-    },
-    {
-      prompt: "What can a caterpillar transform into?",
-      answers: ["Frog", "Butterfly or moth", "Fish", "Spider"],
-      correct: 1,
-      fact: "Many caterpillars transform into butterflies or moths.",
-    },
-    {
-      prompt: "Which animal can change its skin colour?",
-      answers: ["Camel", "Chameleon", "Panda", "Zebra"],
-      correct: 1,
-      fact: "Chameleons can change colour for communication and other purposes.",
-    },
+    { prompt: "Which is the largest land animal?", answers: ["Giraffe", "African elephant", "Rhinoceros", "Hippopotamus"], correct: 1, fact: "The African elephant is the largest living land animal." },
+    { prompt: "What can a caterpillar transform into?", answers: ["Frog", "Butterfly or moth", "Fish", "Spider"], correct: 1, fact: "Many caterpillars transform into butterflies or moths." },
+    { prompt: "Which animal can change its skin colour?", answers: ["Camel", "Chameleon", "Panda", "Zebra"], correct: 1, fact: "Chameleons can change colour for communication and other purposes." },
   ],
   ocean: [
-    {
-      prompt: "Which is the largest animal on Earth?",
-      answers: ["Great white shark", "Blue whale", "Giant squid", "Dolphin"],
-      correct: 1,
-      fact: "The blue whale is the largest known animal to have ever lived.",
-    },
-    {
-      prompt: "What do most fish use to breathe underwater?",
-      answers: ["Lungs", "Gills", "Fins", "Scales"],
-      correct: 1,
-      fact: "Most fish use gills to extract oxygen dissolved in water.",
-    },
-    {
-      prompt: "Which is the largest ocean?",
-      answers: ["Indian", "Atlantic", "Pacific", "Arctic"],
-      correct: 2,
-      fact: "The Pacific is Earth's largest ocean.",
-    },
+    { prompt: "Which is the largest animal on Earth?", answers: ["Great white shark", "Blue whale", "Giant squid", "Dolphin"], correct: 1, fact: "The blue whale is the largest known animal to have ever lived." },
+    { prompt: "What do most fish use to breathe underwater?", answers: ["Lungs", "Gills", "Fins", "Scales"], correct: 1, fact: "Most fish use gills to extract oxygen dissolved in water." },
+    { prompt: "Which is the largest ocean?", answers: ["Indian", "Atlantic", "Pacific", "Arctic"], correct: 2, fact: "The Pacific is Earth's largest ocean." },
   ],
   inventor: [
-    {
-      prompt: "Which simple machine uses a fulcrum?",
-      answers: ["Lever", "Pulley", "Screw", "Wedge"],
-      correct: 0,
-      fact: "A lever rotates around a fixed point called a fulcrum.",
-    },
-    {
-      prompt: "Which material conducts electricity well?",
-      answers: ["Rubber", "Copper", "Dry wood", "Plastic"],
-      correct: 1,
-      fact: "Copper is widely used in electrical wiring because it conducts electricity well.",
-    },
-    {
-      prompt: "What converts electrical energy into motion?",
-      answers: ["Electric motor", "Thermometer", "Compass", "Barometer"],
-      correct: 0,
-      fact: "An electric motor converts electrical energy into mechanical motion.",
-    },
+    { prompt: "Which simple machine uses a fulcrum?", answers: ["Lever", "Pulley", "Screw", "Wedge"], correct: 0, fact: "A lever rotates around a fixed point called a fulcrum." },
+    { prompt: "Which material conducts electricity well?", answers: ["Rubber", "Copper", "Dry wood", "Plastic"], correct: 1, fact: "Copper is widely used in electrical wiring because it conducts electricity well." },
+    { prompt: "What converts electrical energy into motion?", answers: ["Electric motor", "Thermometer", "Compass", "Barometer"], correct: 0, fact: "An electric motor converts electrical energy into mechanical motion." },
   ],
 };
 
-function getFallback(world: string) {
+function getFallback(world: string, errorCode: string) {
   const list = fallbackQuestions[world] || fallbackQuestions.cosmic;
   const q = list[Math.floor(Math.random() * list.length)];
-  return { ...q, fallback: true };
+  return { ...q, fallback: true, errorCode };
 }
 
 function isValidQuestion(q: any): boolean {
-  return (
-    q &&
-    typeof q.prompt === "string" &&
-    q.prompt.trim().length > 0 &&
-    Array.isArray(q.answers) &&
-    q.answers.length === 4 &&
-    q.answers.every(
-      (a: unknown) => typeof a === "string" && a.trim().length > 0
-    ) &&
-    Number.isInteger(q.correct) &&
-    q.correct >= 0 &&
-    q.correct < 4 &&
-    typeof q.fact === "string" &&
-    q.fact.trim().length > 0
-  );
+  return !!q &&
+    typeof q.prompt === "string" && q.prompt.trim().length > 0 &&
+    Array.isArray(q.answers) && q.answers.length === 4 &&
+    q.answers.every((a: unknown) => typeof a === "string" && a.trim().length > 0) &&
+    new Set(q.answers.map((a: string) => a.trim().toLowerCase())).size === 4 &&
+    Number.isInteger(q.correct) && q.correct >= 0 && q.correct < 4 &&
+    typeof q.fact === "string" && q.fact.trim().length > 0;
+}
+
+function classifyApiError(status: number): string {
+  if (status === 400) return "GEMINI_BAD_REQUEST";
+  if (status === 401 || status === 403) return "GEMINI_AUTH_ERROR";
+  if (status === 404) return "GEMINI_MODEL_NOT_FOUND";
+  if (status === 429) return "GEMINI_QUOTA_OR_RATE_LIMIT";
+  if (status >= 500) return "GEMINI_SERVER_ERROR";
+  return "GEMINI_HTTP_ERROR";
 }
 
 export default async function handler(req: any, res: any) {
@@ -120,12 +61,15 @@ export default async function handler(req: any, res: any) {
   const body = req.body || {};
   const requestedWorld = String(body.world || "cosmic").toLowerCase();
   const world = fallbackQuestions[requestedWorld] ? requestedWorld : "cosmic";
-  const difficulty = String(body.difficulty || "medium");
+  const difficulty = ["easy", "medium", "hard"].includes(
+    String(body.difficulty || "medium").toLowerCase()
+  ) ? String(body.difficulty || "medium").toLowerCase() : "medium";
+
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
-    console.error("GEMINI_API_KEY is not configured.");
-    return res.status(200).json(getFallback(world));
+    console.error("[quiz] GEMINI_API_KEY is missing in the deployment environment.");
+    return res.status(200).json(getFallback(world, "MISSING_API_KEY"));
   }
 
   const topics: Record<string, string> = {
@@ -135,13 +79,9 @@ export default async function handler(req: any, res: any) {
     inventor: "inventions, engineering, science and technology",
   };
 
-  const prompt = `
-Create exactly one original multiple-choice quiz question.
+  const prompt = `Create exactly one original ${difficulty} multiple-choice quiz question about ${topics[world]}.
 
-Topic: ${topics[world]}
-Difficulty: ${difficulty}
-
-Return one valid JSON object with exactly these fields:
+Return only a JSON object with these fields:
 {
   "prompt": "Question text",
   "answers": ["Option 1", "Option 2", "Option 3", "Option 4"],
@@ -149,78 +89,73 @@ Return one valid JSON object with exactly these fields:
   "fact": "One short accurate educational fact"
 }
 
-Requirements:
+Rules:
 - Exactly four distinct answers.
-- "correct" is the zero-based index of the correct answer (0 to 3).
-- Exactly one answer is correct.
-- Use concise wording.
-- No Markdown or text outside the JSON object.
-`;
+- correct is the zero-based index of the one correct answer.
+- Keep the question suitable for a general audience.
+- No Markdown or text outside the JSON object.`;
 
   try {
-    const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": apiKey,
+    const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+    const url =
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey,
+      },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          responseMimeType: "application/json",
+          temperature: 0.4,
+          maxOutputTokens: 1200,
         },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            responseMimeType: "application/json",
-            temperature: 0.4,
-            maxOutputTokens: 1200,
-          },
-        }),
-        signal: AbortSignal.timeout(15000),
-      }
-    );
+      }),
+      signal: AbortSignal.timeout(20000),
+    });
 
     if (!response.ok) {
-      const details = await response.text();
-      console.error("Gemini API error:", response.status, details.slice(0, 2000));
-      return res.status(200).json(getFallback(world));
+      const details = (await response.text()).slice(0, 1200);
+      const errorCode = classifyApiError(response.status);
+
+      // Never log the API key.
+      console.error(`[quiz] ${errorCode}; HTTP ${response.status}; model=${model}; details=${details}`);
+      return res.status(200).json(getFallback(world, errorCode));
     }
 
     const data: any = await response.json();
-    const parts = data?.candidates?.[0]?.content?.parts || [];
-    const generatedText = parts
-      .map((part: any) => part.text || "")
+    const candidate = data?.candidates?.[0];
+    const generatedText = (candidate?.content?.parts || [])
+      .map((part: any) => typeof part.text === "string" ? part.text : "")
       .join("")
       .trim();
 
     if (!generatedText) {
-      console.error(
-        "Gemini returned no text. Finish reason:",
-        data?.candidates?.[0]?.finishReason
-      );
-      return res.status(200).json(getFallback(world));
+      const reason = candidate?.finishReason || "NO_TEXT";
+      console.error(`[quiz] GEMINI_EMPTY_RESPONSE; finishReason=${reason}`);
+      return res.status(200).json(getFallback(world, "GEMINI_EMPTY_RESPONSE"));
     }
 
     let question: any;
 
-    // Parse JSON, including responses wrapped in Markdown fences.
-    const cleaned = generatedText
-      .replace(/^```(?:json)?\s*/i, "")
-      .replace(/\s*```$/i, "")
-      .trim();
-
     try {
+      const cleaned = generatedText
+        .replace(/^```(?:json)?\s*/i, "")
+        .replace(/\s*```$/i, "")
+        .trim();
+
       question = JSON.parse(cleaned);
-    } catch (error) {
-      console.error(
-        "Gemini returned malformed JSON:",
-        cleaned.slice(0, 2000),
-        error
-      );
-      return res.status(200).json(getFallback(world));
+    } catch {
+      console.error("[quiz] GEMINI_INVALID_JSON; response could not be parsed.");
+      return res.status(200).json(getFallback(world, "GEMINI_INVALID_JSON"));
     }
 
     if (!isValidQuestion(question)) {
-      console.error("Gemini returned an invalid quiz structure.");
-      return res.status(200).json(getFallback(world));
+      console.error("[quiz] GEMINI_INVALID_QUESTION; response did not match the required schema.");
+      return res.status(200).json(getFallback(world, "GEMINI_INVALID_QUESTION"));
     }
 
     return res.status(200).json({
@@ -230,8 +165,13 @@ Requirements:
       fact: question.fact.trim(),
       fallback: false,
     });
-  } catch (error) {
-    console.error("Gemini request failed:", error);
-    return res.status(200).json(getFallback(world));
+  } catch (error: any) {
+    const errorCode =
+      error?.name === "TimeoutError" || error?.name === "AbortError"
+        ? "GEMINI_TIMEOUT"
+        : "GEMINI_NETWORK_ERROR";
+
+    console.error(`[quiz] ${errorCode}; ${error?.message || "Unknown request error"}`);
+    return res.status(200).json(getFallback(world, errorCode));
   }
 }
