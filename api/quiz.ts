@@ -47,7 +47,8 @@ export default async function handler(req: any, res: any) {
     )
 
     if (!response.ok) {
-      console.error('Gemini API status:', response.status)
+      const errorBody = await response.text()
+      console.error('Gemini API status:', response.status, 'error:', errorBody)
       return res.status(502).json({ error: 'AI question generation failed.' })
     }
 
