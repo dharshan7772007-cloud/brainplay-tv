@@ -13,17 +13,17 @@ type World = {
 const worlds: World[] = [
   {
     id: 'cosmic', number: '01', name: 'COSMIC FRONTIER', subtitle: 'Beyond the red horizon',
-    category: 'SPACE EXPLORATION', emoji: 'ðŸš€', accent: '#ff8a5b', planet: 'mars',
+    category: 'SPACE EXPLORATION', emoji: 'ROCKET', accent: '#ff8a5b', planet: 'mars',
     atmosphere: 'A new world is waiting.', description: 'Engineer a rover that can survive the rocky surface of Mars.',
     questions: [
       { prompt: 'Which wheel design helps a rover travel over loose sand?', answers: ['Narrow, smooth wheels', 'Wide wheels with good grip', 'Tiny glass wheels'], correct: 1, fact: 'Wider wheels spread the load and can improve flotation and traction on loose ground.' },
-      { prompt: 'Why do Mars rovers use solar panels or batteries?', answers: ['To power their instruments', 'To change the planetâ€™s orbit', 'To make oxygen instantly'], correct: 0, fact: 'Rovers need electrical power for computers, cameras, heaters and scientific instruments.' },
+      { prompt: 'Why do Mars rovers use solar panels or batteries?', answers: ['To power their instruments', 'To change the planet’s orbit', 'To make oxygen instantly'], correct: 0, fact: 'Rovers need electrical power for computers, cameras, heaters and scientific instruments.' },
       { prompt: 'What should a rover do before driving over an unknown rock field?', answers: ['Drive at full speed', 'Inspect the route and plan carefully', 'Turn off its cameras'], correct: 1, fact: 'Rovers use images and careful route planning to reduce risk in unfamiliar terrain.' },
     ],
   },
   {
     id: 'wild', number: '02', name: 'WILD EARTH', subtitle: 'The living planet',
-    category: 'NATURE & ECOSYSTEMS', emoji: 'ðŸŒ¿', accent: '#69e6a6', planet: 'earth',
+    category: 'NATURE & ECOSYSTEMS', emoji: 'LEAF', accent: '#69e6a6', planet: 'earth',
     atmosphere: 'Every species has a role.', description: 'Restore a fragile habitat by making smart ecosystem choices.',
     questions: [
       { prompt: 'What is a food chain mainly showing?', answers: ['How energy moves between organisms', 'How rocks form', 'How clouds are named'], correct: 0, fact: 'Food chains show how energy passes from producers to consumers.' },
@@ -219,10 +219,10 @@ function App() {
       <div className="space-backdrop" aria-hidden="true"><span className="nebula nebula-a" /><span className="nebula nebula-b" /><span className="starfield" /><span className="horizon-glow" /></div>
       <header className="topbar">
         <button className="brand" onClick={() => { setScreen('home'); setShowCodex(false) }} aria-label="BrainPlay TV home">
-          <span className="brand-mark">B<span>âœ¦</span></span><span className="brand-name">BRAINPLAY <i>TV</i></span>
+          <span className="brand-mark">B<span>✦</span></span><span className="brand-name">BRAINPLAY <i>TV</i></span>
         </button>
         <div className="top-nav"><span className="live-dot" /> LEARN â€¢ EXPLORE â€¢ LEVEL UP</div>
-        <button className="player-chip" onClick={() => setShowCodex(true)}><span className="avatar">âœ¦</span><span>EXPLORER <b>LVL {level}</b></span></button>
+        <button className="player-chip" onClick={() => setShowCodex(true)}><span className="avatar">✦</span><span>EXPLORER <b>LVL {level}</b></span></button>
       </header>
 
       {screen === 'home' && (
@@ -252,11 +252,11 @@ function App() {
               <div className="planet-ring" />
               <div className="moon moon-one" /><div className="moon moon-two" />
               <div className="rover-art"><div className="rover-antenna" /><div className="rover-camera" /><div className="rover-mast" /><div className="rover-top" /><div className="rover-cabin"><span>BP / 01</span></div><div className="rover-axle" /><div className="rover-wheel wheel-a" /><div className="rover-wheel wheel-b" /><div className="rover-wheel wheel-c" /><div className="rover-shadow" /></div>
-              <div className="floating-tag tag-coordinates"><span>â—‰</span><div><b>MISSION SITE</b><small>ARSIA MONS Â· 18.2Â°N</small></div></div>
+              <div className="floating-tag tag-coordinates"><span>â—‰</span><div><b>MISSION SITE</b><small>ARSIA MONS · 18.2°N</small></div></div>
               <div className="floating-tag tag-signal"><span className="signal-bars">â–‚â–…â–‡</span><div><b>LINK STABLE</b><small>DEEP SPACE RELAY</small></div></div>
               <div className="art-caption"><span>FIG. 01</span><span>THE RED PLANET / SOL 001</span></div>
             </div>
-            <div className="hero-bottomline"><span>01 / 04 WORLDS ONLINE</span><span>DESIGNED FOR THE CURIOUS</span><span>SCROLL TO EXPLORE â†“</span></div>
+            <div className="hero-bottomline"><span>01 / 04 WORLDS ONLINE</span><span>DESIGNED FOR THE CURIOUS</span><span>SCROLL TO EXPLORE ←</span></div>
           </section>
 
           <section className="world-section">
@@ -266,12 +266,12 @@ function App() {
                 const done = progress.completed.includes(world.id)
                 return <button key={world.id} className={`world-card world-${world.id} ${done ? 'is-cleared' : ''}`} style={{ '--accent': world.accent } as React.CSSProperties} onClick={() => startWorld(world.id)}>
                   <div className="world-card-art"><div className={`card-planet card-planet-${world.planet}`} /><div className="card-orbit" /><span className="world-emoji">{world.emoji}</span><span className="world-number">WORLD / {world.number}</span><span className="world-status">{done ? 'âœ“ CLEARED' : 'â— READY TO EXPLORE'}</span></div>
-                  <div className="world-card-copy"><span className="world-category">{world.category}</span><h3>{world.name}</h3><p>{world.subtitle}</p><div className="world-card-bottom"><span>{done ? `BEST ${progress.best[world.id] ?? 0}/3` : '3 CHALLENGES'} <i>Â·</i> +XP</span><span className="launch-icon">â†—</span></div></div>
+                  <div className="world-card-copy"><span className="world-category">{world.category}</span><h3>{world.name}</h3><p>{world.subtitle}</p><div className="world-card-bottom"><span>{done ? `BEST ${progress.best[world.id] ?? 0}/3` : '3 CHALLENGES'} <i>·</i> +XP</span><span className="launch-icon">â†—</span></div></div>
                 </button>
               })}
             </div>
           </section>
-          <section className="progress-panel"><div className="progress-icon">âœ§</div><div className="progress-main"><span className="world-category">EXPLORER PROGRESSION</span><h3>Every discovery moves you forward.</h3><p>Complete missions, collect XP and build your explorer record.</p><div className="xp-track"><span style={{ width: `${(xpInLevel / 250) * 100}%` }} /></div></div><div className="progress-level"><b>{xpInLevel}<small> / 250 XP</small></b><span>LEVEL {level} â†’ {level + 1}</span></div></section>
+          <section className="progress-panel"><div className="progress-icon">✧</div><div className="progress-main"><span className="world-category">EXPLORER PROGRESSION</span><h3>Every discovery moves you forward.</h3><p>Complete missions, collect XP and build your explorer record.</p><div className="xp-track"><span style={{ width: `${(xpInLevel / 250) * 100}%` }} /></div></div><div className="progress-level"><b>{xpInLevel}<small> / 250 XP</small></b><span>LEVEL {level} ↗ {level + 1}</span></div></section>
         </div>
       )}
 
@@ -284,22 +284,22 @@ function App() {
             {activeWorld.id === 'cosmic' ? <div className={`scene-rover ${feedback === 'correct' ? 'rover-success' : ''}`}><div className="scene-rover-mast" /><div className="scene-rover-body"><span>BPTV</span></div><div className="scene-rover-wheel one" /><div className="scene-rover-wheel two" /><div className="scene-rover-wheel three" /></div> : <div className="scene-object">{activeWorld.emoji}</div>}
             <div className="scene-coordinate">FIELD LOG // {activeWorld.number}-{String(questionIndex + 1).padStart(2, '0')}</div><div className="scene-message">{feedback === 'correct' ? 'âœ“ DATA CONFIRMED' : 'AWAITING YOUR DECISION'}</div>
           </div>
-          <div className="challenge-layout"><div className="challenge-intro"><span className="world-category">CHALLENGE {String(questionIndex + 1).padStart(2, '0')}</span><h2>{question.prompt}</h2><p>Think it through, explorer. Choose your answer using the remote.</p><div className="challenge-tip"><span>âœ¦</span><p><b>FIELD NOTE</b><br />Curiosity is your most powerful tool. Every answer reveals something new.</p></div></div>
+          <div className="challenge-layout"><div className="challenge-intro"><span className="world-category">CHALLENGE {String(questionIndex + 1).padStart(2, '0')}</span><h2>{question.prompt}</h2><p>Think it through, explorer. Choose your answer using the remote.</p><div className="challenge-tip"><span>✦</span><p><b>FIELD NOTE</b><br />Curiosity is your most powerful tool. Every answer reveals something new.</p></div></div>
             <div className="answer-panel"><div className="answer-panel-head"><span>SELECT ONE ANSWER</span><span>{selectedAnswer === null ? 'â— READY' : feedback === 'correct' ? 'âœ“ CORRECT' : 'â†» TRY AGAIN'}</span></div>
-              <div className="answer-list">{question.answers.map((answer, index) => <button key={answer} className={`answer-option ${selectedAnswer === index ? (feedback === 'correct' ? 'answer-correct' : 'answer-wrong') : ''}`} disabled={!!feedback} onClick={() => chooseAnswer(index)}><span className="answer-letter">{String.fromCharCode(65 + index)}</span><span>{answer}</span><span className="answer-indicator">{selectedAnswer === index ? (feedback === 'correct' ? 'âœ“' : 'Ã—') : 'â†—'}</span></button>)}</div>
-              {feedback && <div className={`answer-feedback ${feedback}`}><b>{feedback === 'correct' ? 'NICE WORK, EXPLORER.' : 'NOT QUITE â€” TRY AGAIN.'}</b><p>{feedback === 'correct' ? question.fact : 'Reconsider the choices and select a different answer.'}</p><button className="primary-button" onClick={continueMission}>{feedback === 'wrong' ? 'TRY AGAIN' : questionIndex === currentQuestionCount - 1 ? (isAiQuiz ? 'FINISH AI QUIZ' : 'COMPLETE MISSION') : 'NEXT CHALLENGE'} <b>â†’</b></button></div>}
+              <div className="answer-list">{question.answers.map((answer, index) => <button key={answer} className={`answer-option ${selectedAnswer === index ? (feedback === 'correct' ? 'answer-correct' : 'answer-wrong') : ''}`} disabled={!!feedback} onClick={() => chooseAnswer(index)}><span className="answer-letter">{String.fromCharCode(65 + index)}</span><span>{answer}</span><span className="answer-indicator">{selectedAnswer === index ? (feedback === 'correct' ? 'âœ“' : '×') : 'â†—'}</span></button>)}</div>
+              {feedback && <div className={`answer-feedback ${feedback}`}><b>{feedback === 'correct' ? 'NICE WORK, EXPLORER.' : 'NOT QUITE — TRY AGAIN.'}</b><p>{feedback === 'correct' ? question.fact : 'Reconsider the choices and select a different answer.'}</p><button className="primary-button" onClick={continueMission}>{feedback === 'wrong' ? 'TRY AGAIN' : questionIndex === currentQuestionCount - 1 ? (isAiQuiz ? 'FINISH AI QUIZ' : 'COMPLETE MISSION') : 'NEXT CHALLENGE'} <b>↗</b></button></div>}
             </div>
           </div>
         </section>
       )}
 
       {screen === 'result' && (
-        <section className="result-screen"><div className="result-visual"><div className="result-halo" /><div className="result-medal">âœ¦</div><span className="result-spark spark-a">âœ§</span><span className="result-spark spark-b">âœ¦</span></div><div className="eyebrow"><span className="eyebrow-line" /> EXPEDITION REPORT / FILED</div><h1>MISSION <span>ACCOMPLISHED.</span></h1><p className="result-copy">You explored {activeWorld.name.toLowerCase()}, tested your thinking and unlocked a new discovery.</p><div className="result-stats"><div><span>XP EARNED</span><b>+{isAiQuiz ? (answersCorrect > 0 ? 100 : 50) : 50 + (progress.best[activeWorldId] ?? answersCorrect) * 50}</b></div><div><span>QUESTIONS MASTERED</span><b>{isAiQuiz ? answersCorrect : (progress.best[activeWorldId] ?? answersCorrect)}<small> / {currentQuestionCount}</small></b></div><div><span>EXPLORER LEVEL</span><b>{level.toString().padStart(2, '0')}</b></div></div><div className="result-actions"><button className="primary-button" onClick={() => isAiQuiz ? startAiQuiz() : startWorld(activeWorldId)}>{isAiQuiz ? 'NEW AI QUESTION' : 'REPLAY WORLD'} <b>â†»</b></button><button className="secondary-button" onClick={() => setScreen('home')}>RETURN TO UNIVERSE <b>â†’</b></button></div></section>
+        <section className="result-screen"><div className="result-visual"><div className="result-halo" /><div className="result-medal">✦</div><span className="result-spark spark-a">✧</span><span className="result-spark spark-b">✦</span></div><div className="eyebrow"><span className="eyebrow-line" /> EXPEDITION REPORT / FILED</div><h1>MISSION <span>ACCOMPLISHED.</span></h1><p className="result-copy">You explored {activeWorld.name.toLowerCase()}, tested your thinking and unlocked a new discovery.</p><div className="result-stats"><div><span>XP EARNED</span><b>+{isAiQuiz ? (answersCorrect > 0 ? 100 : 50) : 50 + (progress.best[activeWorldId] ?? answersCorrect) * 50}</b></div><div><span>QUESTIONS MASTERED</span><b>{isAiQuiz ? answersCorrect : (progress.best[activeWorldId] ?? answersCorrect)}<small> / {currentQuestionCount}</small></b></div><div><span>EXPLORER LEVEL</span><b>{level.toString().padStart(2, '0')}</b></div></div><div className="result-actions"><button className="primary-button" onClick={() => isAiQuiz ? startAiQuiz() : startWorld(activeWorldId)}>{isAiQuiz ? 'NEW AI QUESTION' : 'REPLAY WORLD'} <b>â†»</b></button><button className="secondary-button" onClick={() => setScreen('home')}>RETURN TO UNIVERSE <b>↗</b></button></div></section>
       )}
 
-      {showCodex && <div className="modal-backdrop" role="presentation" onClick={() => setShowCodex(false)}><section className="codex-modal" role="dialog" aria-modal="true" aria-label="Explorer codex" onClick={(event) => event.stopPropagation()}><button className="modal-close" onClick={() => setShowCodex(false)}>âœ•</button><div className="eyebrow">PERSONAL EXPLORER RECORD</div><h2>Explorer <span>Codex.</span></h2><div className="codex-level"><div className="codex-avatar">âœ¦</div><div><b>LEVEL {level} EXPLORER</b><span>{progress.xp.toLocaleString()} TOTAL EXPERIENCE POINTS</span></div></div><div className="codex-xp"><div><span>LEVEL PROGRESS</span><b>{xpInLevel} / 250 XP</b></div><div className="xp-track"><span style={{ width: `${(xpInLevel / 250) * 100}%` }} /></div></div><div className="codex-worlds">{worlds.map((world) => <div key={world.id}><span>{world.emoji}</span><b>{world.name}</b><small>{progress.completed.includes(world.id) ? `CLEARED Â· BEST ${progress.best[world.id] ?? 0}/3` : 'NOT YET CLEARED'}</small></div>)}</div><button className="reset-button" onClick={resetProgress}>RESET LOCAL PROGRESS</button></section></div>}
+      {showCodex && <div className="modal-backdrop" role="presentation" onClick={() => setShowCodex(false)}><section className="codex-modal" role="dialog" aria-modal="true" aria-label="Explorer codex" onClick={(event) => event.stopPropagation()}><button className="modal-close" onClick={() => setShowCodex(false)}>âœ•</button><div className="eyebrow">PERSONAL EXPLORER RECORD</div><h2>Explorer <span>Codex.</span></h2><div className="codex-level"><div className="codex-avatar">✦</div><div><b>LEVEL {level} EXPLORER</b><span>{progress.xp.toLocaleString()} TOTAL EXPERIENCE POINTS</span></div></div><div className="codex-xp"><div><span>LEVEL PROGRESS</span><b>{xpInLevel} / 250 XP</b></div><div className="xp-track"><span style={{ width: `${(xpInLevel / 250) * 100}%` }} /></div></div><div className="codex-worlds">{worlds.map((world) => <div key={world.id}><span>{world.emoji}</span><b>{world.name}</b><small>{progress.completed.includes(world.id) ? `CLEARED · BEST ${progress.best[world.id] ?? 0}/3` : 'NOT YET CLEARED'}</small></div>)}</div><button className="reset-button" onClick={resetProgress}>RESET LOCAL PROGRESS</button></section></div>}
 
-      <footer className="footer"><span><b>BRAINPLAY</b> TV <i>EXPLORATION SYSTEMS / 01.0</i></span><span>BUILT FOR THE CURIOUS <b>âœ¦</b></span></footer>
+      <footer className="footer"><span><b>BRAINPLAY</b> TV <i>EXPLORATION SYSTEMS / 01.0</i></span><span>BUILT FOR THE CURIOUS <b>✦</b></span></footer>
     </main>
   )
 }
